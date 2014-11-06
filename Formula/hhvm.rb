@@ -57,13 +57,15 @@ class Hhvm < Formula
   depends_on 'openssl' if build.without? 'libressl'
 
   # Standard packages
-  depends_on 'boost'
+  depends_on 'boost' if build.without? 'gcc'
+  depends_on 'boostfb' if build.with? 'gcc'
   depends_on 'binutilsfb'
   depends_on 'curl'
   depends_on 'freetype'
   depends_on 'gd'
   depends_on 'gettext'
-  depends_on 'glog'
+  depends_on 'glog' if build.without? 'gcc'
+  depends_on 'glogfb' if build.with? 'gcc'
   depends_on 'icu4c'
   depends_on 'imagemagick'
   depends_on 'imap-uw'
@@ -124,8 +126,6 @@ class Hhvm < Formula
   def install
     args = [
       ".",
-      "-DBOOST_INCLUDEDIR=#{Formula['boost'].opt_prefix}/include",
-      "-DBOOST_LIBRARYDIR=#{Formula['boost'].opt_prefix}/lib",
       "-DCCLIENT_INCLUDE_PATH=#{Formula['imap-uw'].opt_prefix}/include/imap",
       "-DCMAKE_INCLUDE_PATH=\"#{HOMEBREW_PREFIX}/include:/usr/include\"",
       "-DCMAKE_INSTALL_PREFIX=#{prefix}",
@@ -148,7 +148,6 @@ class Hhvm < Formula
       "-DLIBELF_INCLUDE_DIRS=#{Formula['libelf'].opt_prefix}/include/libelf",
       "-DLIBEVENT_INCLUDE_DIR=#{Formula['libevent'].opt_prefix}/include",
       "-DLIBEVENT_LIB=#{Formula['libevent'].opt_prefix}/lib/libevent.dylib",
-      "-DLIBGLOG_INCLUDE_DIR=#{Formula['glog'].opt_prefix}/include",
       "-DLIBINTL_INCLUDE_DIR=#{Formula['gettext'].opt_prefix}/include",
       "-DLIBINTL_LIBRARIES=#{Formula['gettext'].opt_prefix}/lib/libintl.dylib",
       "-DLIBJPEG_INCLUDE_DIRS=#{Formula['jpeg'].opt_prefix}/include",
@@ -179,8 +178,6 @@ class Hhvm < Formula
     ]
 
     if build.with? 'gcc'
-      opoo caveats_gcc
-
       gcc = Formula["gcc"]
       # Force compilation with gcc-4.9
       ENV['CC'] = "#{gcc.opt_prefix}/bin/gcc-#{gcc.version_suffix}"
@@ -198,13 +195,18 @@ class Hhvm < Formula
       args << "-DCMAKE_CXX_COMPILER=#{gcc.opt_prefix}/bin/g++-#{gcc.version_suffix}"
       args << "-DCMAKE_C_COMPILER=#{gcc.opt_prefix}/bin/gcc-#{gcc.version_suffix}"
       args << "-DCMAKE_ASM_COMPILER=#{gcc.opt_prefix}/bin/gcc-#{gcc.version_suffix}"
-      args << "-DBoost_USE_STATIC_LIBS=ON"
       args << "-DBFD_LIB=#{Formula['binutilsfb'].opt_prefix}/lib/libbfd.a"
+      args << "-DBOOST_INCLUDEDIR=#{Formula['boostfb'].opt_prefix}/include"
+      args << "-DBOOST_LIBRARYDIR=#{Formula['boostfb'].opt_prefix}/lib"
       args << "-DCMAKE_INCLUDE_PATH=#{Formula['binutilsfb'].opt_prefix}/include"
+      args << "-DLIBGLOG_INCLUDE_DIR=#{Formula['glogfb'].opt_prefix}/include"
       args << "-DLIBIBERTY_LIB=#{Formula['binutilsfb'].opt_prefix}/lib/x86_64/libiberty.a"
     else
       args << "-DBFD_LIB=#{Formula['binutilsfb'].opt_prefix}/lib/libbfd.a"
+      args << "-DBOOST_INCLUDEDIR=#{Formula['boost'].opt_prefix}/include"
+      args << "-DBOOST_LIBRARYDIR=#{Formula['boost'].opt_prefix}/lib"
       args << "-DCMAKE_INCLUDE_PATH=#{Formula['binutilsfb'].opt_prefix}/include"
+      args << "-DLIBGLOG_INCLUDE_DIR=#{Formula['glog'].opt_prefix}/include"
       args << "-DLIBIBERTY_LIB=#{Formula['binutilsfb'].opt_prefix}/lib/x86_64/libiberty.a"
     end
 
@@ -317,28 +319,16 @@ class Hhvm < Formula
     EOS
   end
 
-  def caveats_gcc;
-    <<-EOS.undent
+  def caveats; <<-EOS.undent
+    If you have XQuartz (X11) installed,
+    to temporarily remove a symbolic link at '/usr/X11R6'
+    in order to successfully install HHVM.
+      $ sudo rm /usr/X11R6
+      $ sudo ln -s /opt/X11 /usr/X11R6
 
-      If you are getting errors like 'Undefined symbols for architecture x86_64:' execute:
-        $ brew reinstall --build-from-source --cc=gcc-#{Formula['gcc'].version_suffix} boost gflags glog
-
+    The php.ini file can be found in:
+      #{etc}/hhvm/php.ini
     EOS
-  end
-
-  def caveats
-    s = <<-EOS.undent
-      If you have XQuartz (X11) installed,
-      to temporarily remove a symbolic link at '/usr/X11R6'
-      in order to successfully install HHVM.
-        $ sudo rm /usr/X11R6
-        $ sudo ln -s /opt/X11 /usr/X11R6
-
-      The php.ini file can be found in:
-        #{etc}/hhvm/php.ini
-    EOS
-    s << caveats_gcc if build.with? 'gcc'
-    s
   end
 
   plist_options :manual => "hhvm"
