@@ -1,16 +1,16 @@
 class Hhvm < Formula
   homepage "http://hhvm.com/"
   stable do
-    url "https://github.com/facebook/hhvm/archive/HHVM-3.4.2.tar.gz"
-    sha1 "fa0f60b5e517c55f3698738f18a4529f3f60b18f"
+    url "https://github.com/facebook/hhvm/archive/HHVM-3.5.0.tar.gz"
+    sha1 "95e40561b1e26485f4d8d34c45c7655dbd3222cb"
     resource 'third-party' do
-      url "https://github.com/hhvm/hhvm-third-party.git", :revision => "38af35db27a4d962adaefde343dc6dcfc495c8b5"
+      url "https://github.com/hhvm/hhvm-third-party.git", :revision => "d0cad57b5427f84af8f77d60b8b53de4aaea4694"
     end
     resource "folly" do
-      url "https://github.com/facebook/folly.git", :revision => "acc54589227951293f8d3943911f4311468605c9"
+      url "https://github.com/facebook/folly.git", :revision => "6f9b619d9ffc219296a818a83266d60628e6aedd"
     end
     resource "thrift" do
-      url "https://github.com/facebook/fbthrift.git", :revision => "378e954ac82a00ba056e6fccd5e1fa3e76803cc8"
+      url "https://github.com/facebook/fbthrift.git", :revision => "bba5d4590ff71e8f34ce4f90a8d7b2cf867ca3d0"
     end
   end
 
@@ -100,26 +100,26 @@ class Hhvm < Formula
   end
 
   # Hotfix patches
-  if build.stable? or build.devel? or build.head?
-    if build.stable? or build.devel?
-      # Support openssl replacements which don't export RAND_egd()
-      patch do
-        url "https://github.com/facebook/hhvm/commit/df1ac0a7371c818d3d4b5c85859905e373145446.diff"
-        sha1 "d2f5235da22e5c80c9570dfb7fe2db94bb5d11d5"
-      end
-      # Improve segaddr fixing for 32-bit destructors
-      patch do
-        url "https://github.com/facebook/hhvm/commit/d65448c.diff"
-        sha1 "d735bb7012c748fed65fdebfe9d2e9ee9bf19649"
-      end
-    end
-
-    # FB broken selectable path http://git.io/EqkkMA
-    patch do
-      url "https://github.com/facebook/hhvm/pull/3517.diff"
-      sha1 "ba8c3dbf1e75957b6733aaf52207d4e55f1d286a"
-    end
-  end
+  # if build.stable? or build.devel? or build.head?
+  #   # if build.stable? or build.devel?
+  #   #   # Support openssl replacements which don't export RAND_egd()
+  #   #   patch do
+  #   #     url "https://github.com/facebook/hhvm/commit/df1ac0a7371c818d3d4b5c85859905e373145446.diff"
+  #   #     sha1 "d2f5235da22e5c80c9570dfb7fe2db94bb5d11d5"
+  #   #   end
+  #   #   # Improve segaddr fixing for 32-bit destructors
+  #   #   patch do
+  #   #     url "https://github.com/facebook/hhvm/commit/d65448c.diff"
+  #   #     sha1 "d735bb7012c748fed65fdebfe9d2e9ee9bf19649"
+  #   #   end
+  #   # end
+  #
+  #   # FB broken selectable path http://git.io/EqkkMA
+  #   patch do
+  #     url "https://github.com/facebook/hhvm/pull/3517.diff"
+  #     sha1 "ba8c3dbf1e75957b6733aaf52207d4e55f1d286a"
+  #   end
+  # end
 
   def install
     args = [
