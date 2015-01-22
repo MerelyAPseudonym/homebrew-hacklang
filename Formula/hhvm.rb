@@ -56,7 +56,7 @@ class Hhvm < Formula
   depends_on "ninja" => :optional
   depends_on "openssl" if build.without? "libressl"
 
-  # Standard packages
+  # # Standard packages
   depends_on "boost"
   depends_on "binutilsfb"
   depends_on "curl"
@@ -115,10 +115,10 @@ class Hhvm < Formula
     end
 
     # FB broken selectable path http://git.io/EqkkMA
-    patch do
-      url "https://github.com/facebook/hhvm/pull/3517.diff"
-      sha1 "ba8c3dbf1e75957b6733aaf52207d4e55f1d286a"
-    end
+    # patch do
+    #   url "https://github.com/facebook/hhvm/pull/3517.diff"
+    #   sha1 "ba8c3dbf1e75957b6733aaf52207d4e55f1d286a"
+    # end
   end
 
   def install
@@ -275,16 +275,27 @@ class Hhvm < Formula
     cd src do
       args << "-GNinja" if build.with? 'ninja'
       system "cmake", *args
-      if build.with? 'ninja'
-        system "ninja", "-j#{ENV.make_jobs}"
-        system "ninja install"
-      else
-        system "make", "-j#{ENV.make_jobs}"
-        system "make install"
+      # if build.with? 'ninja'
+      #   system "ninja", "-j#{ENV.make_jobs}"
+      #   system "ninja install"
+      # else
+      #   system "make", "-j#{ENV.make_jobs}"
+      #   system "make install"
+      # end
+      cd 'hphp/hack' do
+        system "make", "--jobs=#{ENV.make_jobs}"
+        # system "make", "install"
+        bin.install "bin/h2tp"
+        bin.install "bin/hh_format"
+        bin.install "bin/hh_client"
+        bin.install "bin/hh_server"
+        man.install "man/hh_client.1"
+        man.install "man/hh_server.1"
+        
       end
     end
 
-    install_config
+    # install_config
   end
 
   def install_config
